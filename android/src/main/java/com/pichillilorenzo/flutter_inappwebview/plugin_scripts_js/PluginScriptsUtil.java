@@ -60,15 +60,70 @@ public class PluginScriptsUtil {
           "})();";
 
   public static final String GET_SELECTED_TEXT_JS_SOURCE = "(function(){" +
-          "  var txt;" +
-          "  if (window.getSelection) {" +
-          "    txt = window.getSelection().toString();" +
-          "  } else if (window.document.getSelection) {" +
-          "    txt = window.document.getSelection().toString();" +
-          "  } else if (window.document.selection) {" +
-          "    txt = window.document.selection.createRange().text;" +
-          "  }" +
-          "  return txt;" +
+                "    function getRangeSelectedNodes(range) {" +
+                "      var node = range.startContainer;" +
+                "      var endNode = range.endContainer;" +
+                "      if (node == endNode) return [node];" +
+                "      var rangeNodes = [];" +
+                "      while (node && node != endNode) rangeNodes.push(node = nextNode(node));" +
+                "      node = range.startContainer;" +
+                "      while (node && node != range.commonAncestorContainer) {" +
+                "        rangeNodes.unshift(node);" +
+                "        node = node.parentNode;" +
+                "      }" +
+                "      return rangeNodes;" +
+                "      function nextNode(node) {" +
+                "        if (node.hasChildNodes()) return node.firstChild;" +
+                "        else {" +
+                "          while (node && !node.nextSibling) node = node.parentNode;" +
+                "          if (!node) return null;" +
+                "          return node.nextSibling;" +
+                "        }" +
+                "      }" +
+                "    }" +
+                "    var txt = \"\";" +
+                "    var nodesInRange;" +
+                "    var selection;" +
+                "    if (window.getSelection) {" +
+                "      selection = window.getSelection();" +
+                "      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));" +
+                "      nodes = nodesInRange.filter((node) => node.nodeName == \"#text\" && node.parentElement.nodeName !== \"RT\" && node.parentElement.nodeName !== \"RP\" && node.parentElement.parentElement.nodeName !== \"RT\" && node.parentElement.parentElement.nodeName !== \"RP\");" +
+                "      if (selection.anchorNode === selection.focusNode) {" +
+                "          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));" +
+                "      } else {" +
+                "          for (var i = 0; i < nodes.length; i++) {" +
+                "              var node = nodes[i];" +
+                "              if (i === 0) {" +
+                "                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));" +
+                "              } else if (i === nodes.length - 1) {" +
+                "                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));" +
+                "              } else {" +
+                "                  txt = txt.concat(node.textContent);" +
+                "              }" +
+                "          }" +
+                "      }" +
+                "    } else if (window.document.getSelection) {" +
+                "      selection = window.document.getSelection();" +
+                "      nodesInRange = getRangeSelectedNodes(selection.getRangeAt(0));" +
+                "      nodes = nodesInRange.filter((node) => node.nodeName == \"#text\" && node.parentElement.nodeName !== \"RT\" && node.parentElement.nodeName !== \"RP\" && node.parentElement.parentElement.nodeName !== \"RT\" && node.parentElement.parentElement.nodeName !== \"RP\");" +
+                "      if (selection.anchorNode === selection.focusNode) {" +
+                "          txt = txt.concat(selection.anchorNode.textContent.substring(selection.baseOffset, selection.extentOffset));" +
+                "      } else {" +
+                "          for (var i = 0; i < nodes.length; i++) {" +
+                "              var node = nodes[i];" +
+                "              if (i === 0) {" +
+                "                  txt = txt.concat(node.textContent.substring(selection.getRangeAt(0).startOffset));" +
+                "              } else if (i === nodes.length - 1) {" +
+                "                  txt = txt.concat(node.textContent.substring(0, selection.getRangeAt(0).endOffset));" +
+                "              } else {" +
+                "                  txt = txt.concat(node.textContent);" +
+                "              }" +
+                "          }" +
+                "      }" +
+                "    } else if (window.document.selection) {" +
+                "      txt = window.document.selection.createRange().text;" +
+                "    }" +
+                "    return txt;" +
           "})();";
 
   public static final String CHECK_GLOBAL_KEY_DOWN_EVENT_TO_HIDE_CONTEXT_MENU_JS_PLUGIN_SCRIPT_GROUP_NAME = "CHECK_GLOBAL_KEY_DOWN_EVENT_TO_HIDE_CONTEXT_MENU_JS_PLUGIN_SCRIPT";
@@ -77,7 +132,8 @@ public class PluginScriptsUtil {
           PluginScriptsUtil.CHECK_GLOBAL_KEY_DOWN_EVENT_TO_HIDE_CONTEXT_MENU_JS_SOURCE,
           UserScriptInjectionTime.AT_DOCUMENT_START,
           null,
-          false
+          false,
+          null
   );
 
   // android Workaround to hide context menu when user emit a keydown event
