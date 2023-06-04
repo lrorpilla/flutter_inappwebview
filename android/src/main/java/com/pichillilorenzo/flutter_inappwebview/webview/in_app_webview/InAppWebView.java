@@ -1693,7 +1693,7 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
 
     updateViewLayout(
             floatingContextMenu,
-            new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, curx, ((int) cury) + getScrollY())
+            new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, curx + getScrollX(), ((int) cury) + getScrollY())
     );
 
     mainLooperHandler.post(new Runnable() {
